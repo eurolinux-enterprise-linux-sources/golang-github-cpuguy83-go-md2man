@@ -17,15 +17,19 @@
 
 Name:           golang-%{provider}-%{project}-%{repo}
 Version:        1.0.4
-Release:        2%{?dist}
+Release:        4%{?dist}
 Summary:        Process markdown into manpages
 License:        MIT
 URL:            https://%{import_path}
 Source0:        https://%{import_path}/archive/%{commit}/%{repo}-%{shortcommit}.tar.gz
 Source1:        https://github.com/shurcooL/%{san_repo}/archive/%{san_commit}/%{san_repo}-%{san_shortcommit}.tar.gz
 Source2:        https://github.com/russross/%{bl_repo}/archive/%{bl_commit}/%{bl_repo}-%{bl_shortcommit}.tar.gz
-ExclusiveArch:  x86_64
 Provides:       %{repo} = %{version}-%{release}
+%if 0%{?centos} || 0%{?fedora}
+ExclusiveArch:  %{?go_arches:%{go_arches}}%{!?go_arches:%{ix86} x86_64 %{arm} aarch64 ppc64le s390x}
+%else
+ExclusiveArch:  %{?go_arches:%{go_arches}}%{!?go_arches:x86_64 %{arm} aarch64 ppc64le s390x}
+%endif
 BuildRequires:  golang >= 1.2.1-3
 
 %description
@@ -62,14 +66,22 @@ install -p -m 755 ./_build/src/%{repo} %{buildroot}%{_bindir}
 %{_bindir}/%{repo}
 
 %changelog
-* Wed Jan 20 2016 jchaloup <jchaloup@redhat.com> - 1.0.4-2
-- Build it for z-stream
-  related: #1300321
+* Wed Mar 15 2017 Lokesh Mandvekar <lsm5@redhat.com> - 1.0.4-4
+- Resolves: #1344553 - build only for go_arches
+- update ambiguous changelog in previous entry
+- update go_arches definition
+
+* Wed Mar 15 2017 Lokesh Mandvekar <lsm5@redhat.com> - 1.0.4-3
+- Resolves: #1344553 - build for all available arches (previous build didn't
+fix it)
+
+* Tue Mar 14 2017 Lokesh Mandvekar <lsm5@redhat.com> - 1.0.4-2
+- Resolves: #1344553 - build for 7.4
 
 * Tue Dec 15 2015 jchaloup <jchaloup@redhat.com> - 1.0.4-1
 - Rebase to 1.0.4
   Deps import separatelly, not in one tarball
-  resolves: #1300321
+  resolves: #1291380
 
 * Wed Jun 17 2015 jchaloup <jchaloup@redhat.com> - 1-5
 - Update the spec file for RHEL
